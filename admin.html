@@ -4,397 +4,277 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Daversa Search Excellence</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #080e1a;
-      --bg-card: #0f1829;
-      --bg-card2: #141f30;
-      --border: #1a2840;
-      --border-lit: #213050;
-      --text: #e8edf5;
-      --muted: #6b7f99;
-      --dim: #3d5070;
-      --gold: #f5a623;
-      --gold-d: rgba(245,166,35,.15);
-      --green: #22c979;
-      --green-d: rgba(34,201,121,.13);
-      --red: #f04b5a;
-      --red-d: rgba(240,75,90,.13);
-      --blue: #4b8ef5;
-      --blue-d: rgba(75,142,245,.13);
-      --purple: #a78bfa;
-      --purple-d: rgba(167,139,250,.13);
+      --bg:#080e1a; --card:#0f1829; --border:#1a2840; --lit:#213050;
+      --text:#e8edf5; --muted:#6b7f99; --dim:#3d5070;
+      --gold:#f5a623; --gold-d:rgba(245,166,35,.14);
+      --green:#22c979; --green-d:rgba(34,201,121,.13);
+      --red:#f04b5a; --red-d:rgba(240,75,90,.13);
+      --blue:#4b8ef5; --blue-d:rgba(75,142,245,.13);
+      --purple:#a78bfa; --purple-d:rgba(167,139,250,.13);
     }
+    body { background:var(--bg); color:var(--text); font-family:-apple-system,'Inter',BlinkMacSystemFont,system-ui,sans-serif; min-height:100vh; }
 
-    body { background: var(--bg); color: var(--text); font-family: -apple-system,'Inter',BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; min-height:100vh; }
-
-    /* ── OVERLAY / GATES ── */
-    .gate { position:fixed; inset:0; background:rgba(4,8,16,.96); backdrop-filter:blur(8px); z-index:50; display:flex; align-items:center; justify-content:center; padding:20px; }
-    .gate-box { background:var(--bg-card); border:1px solid var(--border-lit); border-radius:16px; padding:40px 36px; width:100%; max-width:440px; }
-    .gate-box h2 { font-size:20px; font-weight:800; color:white; margin-bottom:4px; }
-    .gate-box p  { font-size:13px; color:var(--muted); margin-bottom:28px; }
-    .field { margin-bottom:16px; }
-    .field label { display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
-    .field input, .field textarea, .field select {
-      width:100%; padding:10px 12px; background:var(--bg); border:1px solid var(--border-lit);
-      border-radius:8px; color:white; font-size:13px; transition:border-color .2s; font-family:inherit;
-    }
-    .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--blue); }
-    .field input::placeholder, .field textarea::placeholder { color:var(--dim); }
-    .field .hint { font-size:11px; color:var(--muted); margin-top:5px; line-height:1.5; }
-    .field textarea { resize:vertical; min-height:72px; }
-    .btn-primary { width:100%; padding:12px; background:var(--gold); color:#000; font-size:14px; font-weight:700; border:none; border-radius:8px; cursor:pointer; transition:opacity .2s; }
-    .btn-primary:hover { opacity:.9; }
-    .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
-    .btn-ghost { background:none; border:1px solid var(--border-lit); color:var(--muted); font-size:12px; padding:6px 12px; border-radius:6px; cursor:pointer; transition:all .2s; }
-    .btn-ghost:hover { border-color:var(--blue); color:var(--blue); }
-    .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+    /* ── GATES ── */
+    .gate { position:fixed;inset:0;background:rgba(4,8,16,.95);backdrop-filter:blur(8px);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px; }
+    .gbox { background:var(--card);border:1px solid var(--lit);border-radius:16px;padding:38px 34px;width:100%;max-width:460px; }
+    .gbox h2 { font-size:20px;font-weight:800;color:white;margin-bottom:4px; }
+    .gbox .sub { font-size:13px;color:var(--muted);margin-bottom:26px; }
+    .f { margin-bottom:16px; }
+    .f label { display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px; }
+    .f input, .f textarea, .f select { width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--lit);border-radius:8px;color:white;font-size:13px;font-family:inherit; }
+    .f input:focus,.f textarea:focus { outline:none;border-color:var(--blue); }
+    .f input::placeholder,.f textarea::placeholder { color:var(--dim); }
+    .f .hint { font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5; }
+    .f textarea { resize:vertical;min-height:80px; }
+    .btn-p { width:100%;padding:12px;background:var(--gold);color:#000;font-size:14px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity .2s; }
+    .btn-p:hover { opacity:.88; }
+    .btn-g { background:none;border:1px solid var(--lit);color:var(--muted);font-size:12px;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .2s; }
+    .btn-g:hover { border-color:var(--blue);color:var(--blue); }
+    .cfg-sec { margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border); }
+    .cfg-sec:last-child { border-bottom:none;margin-bottom:0;padding-bottom:0; }
+    .cfg-sec h4 { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px; }
+    .err-box { background:var(--red-d);border:1px solid rgba(240,75,90,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-top:12px;display:none; }
 
     /* ── HEADER ── */
-    header { background:linear-gradient(180deg,#0b1220 0%,transparent 100%); border-bottom:1px solid var(--border); padding:14px 24px; position:sticky; top:0; z-index:40; }
-    .hdr-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .hdr-left h1 { font-size:17px; font-weight:800; color:white; }
-    .hdr-left p  { font-size:11px; color:var(--muted); }
-    .hdr-right   { display:flex; align-items:center; gap:8px; }
-    .badge-admin  { font-size:11px; font-weight:700; background:var(--purple-d); color:var(--purple); border:1px solid rgba(167,139,250,.3); padding:3px 10px; border-radius:20px; }
+    header { background:linear-gradient(180deg,#0b1220,transparent);border-bottom:1px solid var(--border);padding:14px 24px;position:sticky;top:0;z-index:40; }
+    .hi { max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px; }
+    .hi h1 { font-size:17px;font-weight:800;color:white; }
+    .hi p  { font-size:11px;color:var(--muted); }
+    .hi-r  { display:flex;align-items:center;gap:8px; }
+    .badge { font-size:11px;font-weight:700;background:var(--purple-d);color:var(--purple);border:1px solid rgba(167,139,250,.3);padding:3px 10px;border-radius:20px; }
 
     /* ── LAYOUT ── */
-    .page { max-width:1200px; margin:0 auto; padding:28px 24px 60px; display:grid; grid-template-columns:1fr 380px; gap:20px; }
-    @media(max-width:900px){ .page{grid-template-columns:1fr; padding:16px;} }
+    .page { max-width:1200px;margin:0 auto;padding:28px 24px 60px;display:grid;grid-template-columns:1fr 370px;gap:20px; }
+    @media(max-width:880px){.page{grid-template-columns:1fr;padding:16px;}}
 
-    /* ── CARD ── */
-    .card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; }
-    .card-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-    .card-head h3 { font-size:14px; font-weight:700; color:white; }
-    .card-head p  { font-size:11px; color:var(--muted); margin-top:1px; }
-    .card-body    { padding:20px; }
+    /* ── CARDS ── */
+    .card { background:var(--card);border:1px solid var(--border);border-radius:12px; }
+    .ch { padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+    .ch h3 { font-size:14px;font-weight:700;color:white; }
+    .ch p  { font-size:11px;color:var(--muted);margin-top:1px; }
+    .cb { padding:20px; }
 
     /* ── NAME CHIPS ── */
-    .chips { display:flex; flex-wrap:wrap; gap:8px; }
-    .chip {
-      padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer;
-      background:rgba(255,255,255,.05); border:1px solid var(--border-lit); color:var(--muted);
-      transition:all .15s; user-select:none;
-    }
-    .chip:hover { border-color:var(--blue); color:var(--text); }
-    .chip.sel { background:var(--blue-d); border-color:var(--blue); color:var(--blue); }
-    .chip.all-team { background:var(--purple-d); border-color:rgba(167,139,250,.4); color:var(--purple); }
-    .chip.all-team.sel { background:rgba(167,139,250,.25); border-color:var(--purple); }
+    .chips { display:flex;flex-wrap:wrap;gap:8px; }
+    .chip { padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid var(--lit);color:var(--muted);transition:all .15s;user-select:none; }
+    .chip:hover { border-color:var(--blue);color:var(--text); }
+    .chip.on { background:var(--blue-d);border-color:var(--blue);color:var(--blue); }
+    .chip.team-all { background:var(--purple-d);border-color:rgba(167,139,250,.4);color:var(--purple); }
+    .chip.team-all.on { background:rgba(167,139,250,.22);border-color:var(--purple); }
 
     /* ── SECTION TABS ── */
-    .sec-tabs { display:flex; flex-wrap:wrap; gap:6px; }
-    .sec-tab {
-      padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;
-      background:rgba(255,255,255,.04); border:1px solid var(--border); color:var(--muted);
-      transition:all .15s;
-    }
-    .sec-tab:hover { border-color:var(--border-lit); color:var(--text); }
-    .sec-tab.sel { border-color:rgba(245,166,35,.4); background:var(--gold-d); color:var(--gold); }
+    .stabs { display:flex;flex-wrap:wrap;gap:6px; }
+    .stab { padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);transition:all .15s; }
+    .stab:hover { border-color:var(--lit);color:var(--text); }
+    .stab.on { border-color:rgba(245,166,35,.4);background:var(--gold-d);color:var(--gold); }
 
     /* ── ACTIVITY CARDS ── */
-    .act-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    @media(max-width:600px){ .act-grid{grid-template-columns:1fr;} }
-    .act-card {
-      padding:10px 14px; border-radius:8px; cursor:pointer;
-      background:rgba(255,255,255,.03); border:1px solid var(--border);
-      display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
-      transition:all .15s;
-    }
-    .act-card:hover { border-color:var(--border-lit); background:rgba(255,255,255,.06); }
-    .act-card.sel   { border-color:var(--blue); background:var(--blue-d); }
-    .act-card.neg.sel { border-color:var(--red); background:var(--red-d); }
-    .act-card.bonus.sel { border-color:var(--purple); background:var(--purple-d); }
-    .act-name { font-size:12px; color:var(--text); line-height:1.45; }
-    .act-badge {
-      flex-shrink:0; font-size:12px; font-weight:800; padding:2px 8px;
-      border-radius:20px; white-space:nowrap;
-    }
-    .act-badge.pos  { background:var(--green-d); color:var(--green); }
-    .act-badge.neg  { background:var(--red-d); color:var(--red); }
-    .act-badge.team { background:var(--blue-d); color:var(--blue); }
-    .act-badge.bonus{ background:var(--purple-d); color:var(--purple); }
+    .agrid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+    @media(max-width:600px){.agrid{grid-template-columns:1fr;}}
+    .acard { padding:10px 14px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;transition:all .15s; }
+    .acard:hover { border-color:var(--lit);background:rgba(255,255,255,.06); }
+    .acard.on  { border-color:var(--blue);background:var(--blue-d); }
+    .acard.neg.on { border-color:var(--red);background:var(--red-d); }
+    .acard.bonus.on { border-color:var(--purple);background:var(--purple-d); }
+    .aname { font-size:12px;color:var(--text);line-height:1.45; }
+    .abadge { flex-shrink:0;font-size:12px;font-weight:800;padding:2px 8px;border-radius:20px;white-space:nowrap; }
+    .abadge.pos  { background:var(--green-d);color:var(--green); }
+    .abadge.neg  { background:var(--red-d);color:var(--red); }
+    .abadge.team { background:var(--blue-d);color:var(--blue); }
+    .abadge.bon  { background:var(--purple-d);color:var(--purple); }
 
-    /* ── SUBMIT AREA ── */
-    .submit-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:start; }
-    @media(max-width:500px){ .submit-row{grid-template-columns:1fr;} }
-    .submit-btn {
-      padding:12px 24px; background:var(--green); color:#000;
-      font-size:14px; font-weight:800; border:none; border-radius:8px;
-      cursor:pointer; transition:all .2s; white-space:nowrap;
-    }
-    .submit-btn:hover { opacity:.9; transform:translateY(-1px); }
-    .submit-btn:disabled { opacity:.35; cursor:not-allowed; transform:none; }
-    .submit-btn.neg { background:var(--red); color:white; }
-    .submit-btn.bonus { background:var(--purple); color:white; }
+    /* ── SUBMIT ── */
+    .sel-sum { background:rgba(75,142,245,.07);border:1px solid rgba(75,142,245,.2);border-radius:8px;padding:12px 16px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:12px; }
+    .sel-pts { font-size:18px;font-weight:900; }
+    .sel-pts.pos{color:var(--green);} .sel-pts.neg{color:var(--red);} .sel-pts.bon{color:var(--purple);}
+    .sub-row { display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start; }
+    @media(max-width:500px){.sub-row{grid-template-columns:1fr;}}
+    .sub-btn { padding:12px 24px;background:var(--green);color:#000;font-size:14px;font-weight:800;border:none;border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap; }
+    .sub-btn:hover { opacity:.88;transform:translateY(-1px); }
+    .sub-btn:disabled { opacity:.3;cursor:not-allowed;transform:none; }
+    .sub-btn.neg { background:var(--red);color:white; }
+    .sub-btn.bon { background:var(--purple);color:white; }
+    .custom-row { display:grid;grid-template-columns:110px 1fr;gap:10px; }
+    @media(max-width:480px){.custom-row{grid-template-columns:1fr;}}
 
-    /* ── SELECTED SUMMARY ── */
-    .selection-summary {
-      background:rgba(75,142,245,.07); border:1px solid rgba(75,142,245,.2);
-      border-radius:8px; padding:12px 16px; font-size:13px;
-      display:flex; justify-content:space-between; align-items:center; gap:12px;
-    }
-    .sel-pts { font-size:18px; font-weight:900; }
-    .sel-pts.pos   { color:var(--green); }
-    .sel-pts.neg   { color:var(--red); }
-    .sel-pts.bonus { color:var(--purple); }
-
-    /* ── RECENT ENTRIES ── */
-    .entry-list { display:flex; flex-direction:column; gap:8px; max-height:calc(100vh - 200px); overflow-y:auto; }
-    .entry-item {
-      display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
-      padding:10px 12px; border-radius:8px;
-      background:rgba(255,255,255,.03); border:1px solid var(--border);
-      transition:background .15s;
-    }
-    .entry-item:hover { background:rgba(255,255,255,.05); }
-    .entry-left { flex:1; min-width:0; }
-    .entry-name { font-size:13px; font-weight:700; color:white; }
-    .entry-cat  { font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .entry-meta { font-size:10px; color:var(--dim); margin-top:3px; }
-    .entry-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
-    .entry-pts { font-size:14px; font-weight:800; }
-    .entry-pts.pos { color:var(--green); }
-    .entry-pts.neg { color:var(--red); }
-    .del-btn {
-      background:none; border:none; color:var(--dim); cursor:pointer;
-      font-size:14px; padding:2px 4px; border-radius:4px; transition:color .15s;
-      line-height:1;
-    }
-    .del-btn:hover { color:var(--red); }
+    /* ── ENTRIES ── */
+    .elist { display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 220px);overflow-y:auto; }
+    .eitem { display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);transition:background .15s; }
+    .eitem:hover { background:rgba(255,255,255,.05); }
+    .ename { font-size:13px;font-weight:700;color:white; }
+    .ecat  { font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px; }
+    .emeta { font-size:10px;color:var(--dim);margin-top:3px; }
+    .epts  { font-size:14px;font-weight:800; }
+    .epts.pos{color:var(--green);} .epts.neg{color:var(--red);}
+    .dbtn  { background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;transition:color .15s; }
+    .dbtn:hover { color:var(--red); }
 
     /* ── TOAST ── */
-    #toast {
-      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
-      background:#1e2d3d; border:1px solid var(--border-lit); color:white;
-      padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600;
-      z-index:99; opacity:0; transition:all .3s; pointer-events:none; white-space:nowrap;
-    }
-    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    #toast.success { border-color:rgba(34,201,121,.4); background:rgba(34,201,121,.15); color:var(--green); }
-    #toast.error   { border-color:rgba(240,75,90,.4);  background:rgba(240,75,90,.15);  color:var(--red); }
+    #toast { position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);background:#1e2d3d;border:1px solid var(--lit);color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:99;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap; }
+    #toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+    #toast.ok  { border-color:rgba(34,201,121,.4);background:rgba(34,201,121,.15);color:var(--green); }
+    #toast.err { border-color:rgba(240,75,90,.4); background:rgba(240,75,90,.15); color:var(--red); }
 
-    /* ── MISC ── */
-    .section-divider { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:18px 0 10px; }
-    .empty-state { text-align:center; padding:32px 16px; color:var(--dim); font-size:13px; }
-    .custom-pts-row { display:grid; grid-template-columns:120px 1fr; gap:10px; }
-    @media(max-width:500px){ .custom-pts-row{grid-template-columns:1fr;} }
-    .week-auto { font-size:11px; color:var(--muted); margin-top:4px; }
-    .scroll-lock { overflow:hidden; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .fade-up { animation:fadeUp .35s ease; }
-
-    /* ── CONFIG SECTIONS ── */
-    .cfg-section { margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border); }
-    .cfg-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
-    .cfg-section h4 { font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+    .wk-note { font-size:11px;color:var(--muted);margin-top:4px; }
+    .empty { text-align:center;padding:30px 16px;color:var(--dim);font-size:13px; }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} .fu{animation:fadeUp .35s ease;}
   </style>
 </head>
 <body>
 
-<!-- ══════════ PASSWORD GATE ══════════ -->
-<div id="gate-pw" class="gate">
-  <div class="gate-box">
+<!-- ══ PASSWORD GATE ══ -->
+<div id="g-pw" class="gate">
+  <div class="gbox">
     <div style="font-size:32px;margin-bottom:12px;">🔐</div>
     <h2>Admin Access</h2>
-    <p>Enter the admin password to log and manage points</p>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPw()" />
-    </div>
-    <button class="btn-primary" onclick="checkPw()">Enter Admin Panel</button>
-    <div style="margin-top:16px;text-align:center;">
-      <a href="index.html" style="font-size:12px;color:var(--muted);text-decoration:none;">← View Public Leaderboard</a>
-    </div>
+    <p class="sub">Enter the admin password to log and manage points</p>
+    <div class="f"><label>Password</label><input type="password" id="pw-in" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPw()" /></div>
+    <div class="err-box" id="pw-err">Incorrect password. Try again.</div>
+    <button class="btn-p" onclick="checkPw()" style="margin-top:4px;">Enter Admin Panel</button>
+    <div style="margin-top:16px;text-align:center;"><a href="index.html" style="font-size:12px;color:var(--muted);text-decoration:none;">← View Public Leaderboard</a></div>
   </div>
 </div>
 
-<!-- ══════════ SETUP GATE ══════════ -->
-<div id="gate-setup" class="gate" style="display:none;">
-  <div class="gate-box" style="max-width:520px;max-height:90vh;overflow-y:auto;">
+<!-- ══ SETUP GATE ══ -->
+<div id="g-setup" class="gate" style="display:none;">
+  <div class="gbox" style="max-width:500px;max-height:90vh;overflow-y:auto;">
     <div style="font-size:32px;margin-bottom:12px;">⚙️</div>
     <h2>One-Time Setup</h2>
-    <p>Configure your Supabase database and team details. You only need to do this once.</p>
+    <p class="sub">Configure Supabase and your team. You only do this once per device.</p>
 
-    <div class="cfg-section">
-      <h4>🗄 Supabase Database</h4>
-      <div class="field">
-        <label>Supabase Project URL</label>
-        <input type="text" id="cfg-sb-url" placeholder="https://xxxx.supabase.co" />
-        <div class="hint">Found in Supabase → Settings → API → Project URL</div>
+    <div class="cfg-sec">
+      <h4>🗄 Supabase</h4>
+      <div class="f">
+        <label>Project URL</label>
+        <input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co" />
+        <div class="hint">Supabase → Settings → API → Project URL</div>
       </div>
-      <div class="field">
-        <label>Supabase Anon Key</label>
-        <input type="text" id="cfg-sb-key" placeholder="eyJ..." />
-        <div class="hint">Found in Supabase → Settings → API → anon public key</div>
+      <div class="f">
+        <label>API Key (publishable / anon)</label>
+        <input type="text" id="cfg-key" placeholder="sb_publishable_... or eyJ..." />
+        <div class="hint">Supabase → Settings → API → your publishable or anon key</div>
       </div>
     </div>
 
-    <div class="cfg-section">
+    <div class="cfg-sec">
       <h4>👥 Team Members</h4>
-      <div class="field">
-        <label>Team Members (one per line)</label>
+      <div class="f">
+        <label>One name per line</label>
         <textarea id="cfg-members" placeholder="Sarah M&#10;Mike K&#10;Alex R&#10;Jordan P"></textarea>
-        <div class="hint">Enter each team member's name on a separate line. Names must be consistent — they'll appear exactly as typed on the leaderboard.</div>
       </div>
     </div>
 
-    <div class="cfg-section">
+    <div class="cfg-sec">
       <h4>📅 Season</h4>
-      <div class="field">
-        <label>Season Start Date</label>
-        <input type="date" id="cfg-start" />
-        <div class="hint">The kickoff date of the 8-week competition</div>
-      </div>
-      <div class="field">
-        <label>Team Name</label>
-        <input type="text" id="cfg-team" placeholder="Daversa Partners" />
-      </div>
-      <div class="field">
-        <label>Admin Password (change if needed)</label>
-        <input type="password" id="cfg-pw" placeholder="Leave blank to keep current" />
-      </div>
+      <div class="f"><label>Season Start Date (kickoff day)</label><input type="date" id="cfg-start" /></div>
+      <div class="f"><label>Team Name</label><input type="text" id="cfg-team" placeholder="Daversa Partners" /></div>
+      <div class="f"><label>Change Admin Password</label><input type="password" id="cfg-pw" placeholder="Leave blank to keep current" /></div>
     </div>
 
-    <button class="btn-primary" onclick="saveConfig()">Save & Enter Admin Panel →</button>
+    <div class="err-box" id="cfg-err"></div>
+    <button class="btn-p" onclick="saveSetup()">Save & Enter Admin Panel →</button>
   </div>
 </div>
 
-<!-- ══════════ SETTINGS PANEL ══════════ -->
-<div id="panel-settings" class="gate" style="display:none;">
-  <div class="gate-box" style="max-width:480px;max-height:90vh;overflow-y:auto;">
+<!-- ══ SETTINGS PANEL ══ -->
+<div id="g-settings" class="gate" style="display:none;">
+  <div class="gbox" style="max-width:480px;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <h2 style="font-size:17px;font-weight:800;color:white;">Settings</h2>
-      <button class="btn-ghost" onclick="closeSettings()">✕ Close</button>
+      <button class="btn-g" onclick="closeSettings()">✕ Close</button>
     </div>
-
-    <div class="cfg-section">
-      <h4>🗄 Supabase</h4>
-      <div class="field">
-        <label>Supabase Project URL</label>
-        <input type="text" id="s-sb-url" />
-      </div>
-      <div class="field">
-        <label>Supabase Anon Key</label>
-        <input type="text" id="s-sb-key" />
-      </div>
+    <div class="cfg-sec"><h4>🗄 Supabase</h4>
+      <div class="f"><label>Project URL</label><input type="text" id="s-url" /></div>
+      <div class="f"><label>API Key</label><input type="text" id="s-key" /></div>
     </div>
-    <div class="cfg-section">
-      <h4>👥 Team Members</h4>
-      <div class="field">
-        <label>Team Members (one per line)</label>
-        <textarea id="s-members"></textarea>
-      </div>
+    <div class="cfg-sec"><h4>👥 Team Members</h4>
+      <div class="f"><label>One per line</label><textarea id="s-members"></textarea></div>
     </div>
-    <div class="cfg-section">
-      <h4>📅 Season</h4>
-      <div class="field"><label>Season Start Date</label><input type="date" id="s-start" /></div>
-      <div class="field"><label>Team Name</label><input type="text" id="s-team" /></div>
-      <div class="field">
-        <label>Change Admin Password</label>
-        <input type="password" id="s-pw" placeholder="Leave blank to keep current" />
-      </div>
+    <div class="cfg-sec"><h4>📅 Season</h4>
+      <div class="f"><label>Season Start Date</label><input type="date" id="s-start" /></div>
+      <div class="f"><label>Team Name</label><input type="text" id="s-team" /></div>
+      <div class="f"><label>Change Password</label><input type="password" id="s-pw" placeholder="Leave blank to keep current" /></div>
     </div>
-    <button class="btn-primary" onclick="updateSettings()">Save Settings</button>
+    <button class="btn-p" onclick="saveSettings()">Save Settings</button>
   </div>
 </div>
 
-<!-- ══════════ MAIN APP ══════════ -->
+<!-- ══ MAIN APP ══ -->
 <div id="app" style="display:none;">
-
   <header>
-    <div class="hdr-inner">
-      <div class="hdr-left">
-        <h1>🏆 <span id="hdr-team">Daversa Partners</span> — Admin</h1>
-        <p>Log points, manage the season</p>
-      </div>
-      <div class="hdr-right">
-        <span class="badge-admin">🔐 Admin</span>
-        <a href="index.html" class="btn-ghost" style="text-decoration:none;">📊 View Leaderboard</a>
-        <button class="btn-ghost" onclick="openSettings()">⚙ Settings</button>
-        <button class="btn-ghost" onclick="logout()">Logout</button>
+    <div class="hi">
+      <div><h1>🏆 <span id="h-team">Daversa Partners</span> — Admin</h1><p>Log points · manage the season</p></div>
+      <div class="hi-r">
+        <span class="badge">🔐 Admin</span>
+        <a href="index.html" class="btn-g" style="text-decoration:none;">📊 Leaderboard</a>
+        <button class="btn-g" onclick="openSettings()">⚙ Settings</button>
+        <button class="btn-g" onclick="logout()">Logout</button>
       </div>
     </div>
   </header>
 
   <div class="page">
-
-    <!-- LEFT: LOG POINTS FORM -->
+    <!-- LEFT: FORM -->
     <div style="display:flex;flex-direction:column;gap:16px;">
 
-      <!-- WHO -->
+      <!-- 1. WHO -->
       <div class="card">
-        <div class="card-head">
-          <div><h3>1 · Who gets the points?</h3><p>Select one or more team members</p></div>
-        </div>
-        <div class="card-body">
-          <div class="chips" id="name-chips"><!-- filled by JS --></div>
+        <div class="ch"><div><h3>1 · Who gets the points?</h3><p>Select one or more team members</p></div></div>
+        <div class="cb">
+          <div class="chips" id="name-chips"></div>
           <div style="margin-top:12px;">
-            <button class="chip all-team" id="all-team-btn" onclick="toggleAllTeam()">⚡ All Team</button>
+            <button class="chip team-all" id="all-btn" onclick="toggleAll()">⚡ All Team</button>
           </div>
         </div>
       </div>
 
-      <!-- SECTION -->
+      <!-- 2. CATEGORY -->
       <div class="card">
-        <div class="card-head">
-          <div><h3>2 · Select category</h3><p>Choose a section then the specific activity</p></div>
+        <div class="ch"><div><h3>2 · Select category</h3><p>Pick a section then the activity</p></div></div>
+        <div class="cb">
+          <div class="stabs" id="sec-tabs"></div>
+          <div style="margin-top:16px;" id="act-area"><div class="empty">Select a section above</div></div>
         </div>
-        <div class="card-body">
-          <div class="sec-tabs" id="sec-tabs"><!-- filled by JS --></div>
-          <div style="margin-top:16px;" id="act-container">
-            <div class="empty-state">Select a section above to see activities</div>
+      </div>
+
+      <!-- BONUS FIELDS -->
+      <div class="card" id="bonus-card" style="display:none;">
+        <div class="ch"><div><h3>Bonus Award Details</h3></div></div>
+        <div class="cb">
+          <div class="custom-row">
+            <div class="f" style="margin:0;"><label>Points</label><input type="number" id="custom-pts" placeholder="e.g. 20" /></div>
+            <div class="f" style="margin:0;"><label>Reason</label><input type="text" id="custom-reason" placeholder="What did they do exceptionally?" /></div>
           </div>
         </div>
       </div>
 
-      <!-- BONUS CUSTOM -->
-      <div class="card" id="bonus-fields" style="display:none;">
-        <div class="card-head"><div><h3>Bonus Award Details</h3></div></div>
-        <div class="card-body">
-          <div class="custom-pts-row">
-            <div class="field" style="margin:0;">
-              <label>Points</label>
-              <input type="number" id="custom-pts" placeholder="e.g. 25" min="-100" max="500" />
-            </div>
-            <div class="field" style="margin:0;">
-              <label>Reason</label>
-              <input type="text" id="custom-reason" placeholder="Exceptional contribution — describe it" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NOTES + DATE + SUBMIT -->
+      <!-- 3. SUBMIT -->
       <div class="card">
-        <div class="card-head"><div><h3>3 · Notes &amp; submit</h3></div></div>
-        <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
-
-          <!-- Selection summary -->
-          <div class="selection-summary" id="sel-summary" style="display:none;">
+        <div class="ch"><div><h3>3 · Confirm &amp; log</h3></div></div>
+        <div class="cb" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sel-sum" id="sel-sum" style="display:none;">
             <div>
-              <div style="font-size:12px;color:var(--muted);margin-bottom:2px;" id="sel-who">—</div>
-              <div style="font-size:13px;font-weight:600;color:var(--text);" id="sel-what">—</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:2px;" id="sum-who">—</div>
+              <div style="font-size:13px;font-weight:600;" id="sum-what">—</div>
             </div>
-            <div class="sel-pts" id="sel-pts">—</div>
+            <div class="sel-pts" id="sum-pts">—</div>
           </div>
-
-          <div class="submit-row">
-            <div class="field" style="margin:0;">
+          <div class="sub-row">
+            <div class="f" style="margin:0;">
               <label>Notes <span style="font-weight:400;text-transform:none;color:var(--dim);">(optional)</span></label>
-              <input type="text" id="notes-input" placeholder="Search name, context, candidate name…" />
+              <input type="text" id="notes" placeholder="Search name, candidate, context…" />
             </div>
-            <div class="field" style="margin:0;">
+            <div class="f" style="margin:0;">
               <label>Date</label>
-              <input type="date" id="date-input" />
-              <div class="week-auto" id="week-display">Week —</div>
+              <input type="date" id="date-in" />
+              <div class="wk-note" id="wk-note">Week —</div>
             </div>
           </div>
-
-          <button class="submit-btn" id="submit-btn" onclick="submitPoints()" disabled>
-            Log Points →
-          </button>
+          <button class="sub-btn" id="sub-btn" onclick="submitPoints()" disabled>Log Points →</button>
         </div>
       </div>
 
@@ -403,524 +283,377 @@
     <!-- RIGHT: RECENT ENTRIES -->
     <div>
       <div class="card" style="position:sticky;top:80px;">
-        <div class="card-head">
-          <div><h3>Recent Entries</h3><p id="entry-count">Loading…</p></div>
-          <button class="btn-ghost" onclick="loadEntries()" style="font-size:11px;">↺</button>
+        <div class="ch">
+          <div><h3>Recent Entries</h3><p id="entry-ct">Loading…</p></div>
+          <button class="btn-g" onclick="loadEntries()">↺</button>
         </div>
-        <div class="card-body" style="padding:12px;">
-          <div class="entry-list" id="entry-list">
-            <div class="empty-state">Loading…</div>
-          </div>
+        <div style="padding:12px;">
+          <div class="elist" id="elist"><div class="empty">Loading…</div></div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
 <div id="toast"></div>
 
-<!-- ══════════ SCRIPT ══════════ -->
 <script>
-
-// ─────────────────────────────────────────────
-// DATA: SCORING SYSTEM
-// ─────────────────────────────────────────────
+// ── SCORING ──
 const SECTIONS = [
-  {
-    id: 'foundational', label: 'Foundational', emoji: '🏗',
-    cats: [
-      { name: 'Search call notes (night before)',                          pts: 5,  team: true  },
-      { name: 'Action items notes (≤1hr post search call)',                pts: 5,  team: true  },
-      { name: 'Game plan articulation / proactive strategy with PL',      pts: 10, team: true  },
-    ]
-  },
-  {
-    id: 'collaboration', label: 'Collaboration', emoji: '🤝',
-    cats: [
-      { name: 'Smart AI leverage shared with team',                        pts: 10, team: false },
-      { name: 'Recruited candidate for someone else\'s search',            pts: 15, team: false },
-      { name: 'Organized handoff (both people earn)',                      pts: 15, team: false, dual: true },
-      { name: '3+ qualified candidates intro\'d in one week',              pts: 15, team: true  },
-    ]
-  },
-  {
-    id: 'candidate', label: 'Candidate Gen', emoji: '🎯',
-    cats: [
-      { name: 'Networking → sourced candidate',                            pts: 10, team: false },
-      { name: 'Candidate into process (past first convo)',                 pts: 15, team: false },
-      { name: 'Kept candidate in process when they tried to pull',         pts: 15, team: false },
-    ]
-  },
-  {
-    id: 'quality', label: 'Search Quality', emoji: '💎',
-    cats: [
-      { name: 'Proactive client touchpoint / meaningful recap',            pts: 10, team: false },
-      { name: 'Got ahead of comp & backchannels proactively',             pts: 15, team: false },
-      { name: 'In-person meeting → candidate sticks',                      pts: 20, team: false },
-      { name: 'Sincere client shout-out (appreciation / loved candidate)', pts: 20, team: false },
-    ]
-  },
-  {
-    id: 'outcomes', label: 'Search Outcomes', emoji: '🏆',
-    cats: [
-      { name: 'Search closed — originated candidate (helped manage/prep)', pts: 30, team: false },
-      { name: 'Search closed — new to firm',                               pts: 50, team: false },
-      { name: 'Clean close (no comp drama, no backchannel surprises)',     pts: 25, team: false },
-      { name: 'Repeat work & strong reference',                            pts: 50, team: true  },
-    ]
-  },
-  {
-    id: 'deductions', label: 'Deductions ⚠️', emoji: '❌',
-    cats: [
-      { name: 'Client asked for something we should have provided',        pts: -5,  team: true },
-      { name: 'General mismanagement (blindsided by candidate/meeting)',   pts: -5,  team: true },
-      { name: 'Candidate clearly misqualified entering process',           pts: -5,  team: true },
-      { name: 'Missed issue / bad backchannel surprise (post R2)',         pts: -10, team: true },
-      { name: 'Too much "I" vs "We" on search call',                      pts: -15, team: true },
-    ]
-  },
-  {
-    id: 'bonus', label: '⭐ Bonus', emoji: '⭐',
-    cats: [
-      { name: 'Exceptional behaviour (admin discretion)', pts: 0, bonus: true },
-    ]
-  },
+  { id:'found',  label:'🏗 Foundational',       cats:[
+    {name:'Search call notes (night before)',                         pts:5,  team:true},
+    {name:'Action items notes (≤1hr post search call)',              pts:5,  team:true},
+    {name:'Game plan articulation / proactive strategy with PL',    pts:10, team:true},
+  ]},
+  { id:'collab', label:'🤝 Collaboration',       cats:[
+    {name:'Smart AI leverage shared with team',                      pts:10},
+    {name:'Recruited candidate for someone else\'s search',          pts:15},
+    {name:'Organized handoff (both people earn)',                    pts:15, dual:true},
+    {name:'3+ qualified candidates intro\'d in one week',            pts:15, team:true},
+  ]},
+  { id:'cand',   label:'🎯 Candidate Gen',        cats:[
+    {name:'Networking → sourced candidate',                          pts:10},
+    {name:'Candidate into process (past first convo)',               pts:15},
+    {name:'Kept candidate in process when they tried to pull',       pts:15},
+  ]},
+  { id:'qual',   label:'💎 Search Quality',       cats:[
+    {name:'Proactive client touchpoint / meaningful recap',          pts:10},
+    {name:'Got ahead of comp & backchannels proactively',           pts:15},
+    {name:'In-person meeting → candidate sticks',                    pts:20},
+    {name:'Sincere client shout-out (appreciation / loved cand.)',   pts:20},
+  ]},
+  { id:'out',    label:'🏆 Search Outcomes',      cats:[
+    {name:'Search closed — originated candidate (helped manage)',    pts:30},
+    {name:'Search closed — new to firm',                             pts:50},
+    {name:'Clean close (no comp drama, no backchannel surprises)',   pts:25},
+    {name:'Repeat work & strong reference',                          pts:50, team:true},
+  ]},
+  { id:'ded',    label:'❌ Deductions',            cats:[
+    {name:'Client asked for something we should have provided',      pts:-5,  team:true},
+    {name:'General mismanagement (blindsided by candidate/meeting)', pts:-5,  team:true},
+    {name:'Candidate clearly misqualified entering process',         pts:-5,  team:true},
+    {name:'Missed issue / bad backchannel surprise (post R2)',       pts:-10, team:true},
+    {name:'Too much "I" vs "We" on search call',                    pts:-15, team:true},
+  ]},
+  { id:'bonus',  label:'⭐ Bonus',                cats:[
+    {name:'Exceptional behaviour (admin discretion)',                pts:0, bonus:true},
+  ]},
 ];
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-const LS = {
-  get: k => localStorage.getItem('dp_'+k),
-  set: (k,v) => localStorage.setItem('dp_'+k, v),
-  json: k => { try { return JSON.parse(localStorage.getItem('dp_'+k)); } catch(e) { return null; } },
+// ── STORAGE ──
+const S = { g:k=>localStorage.getItem('dp_'+k), s:(k,v)=>localStorage.setItem('dp_'+k,v), j:k=>{try{return JSON.parse(localStorage.getItem('dp_'+k))}catch{return null}} };
+
+// Hardcoded defaults — no setup screen needed
+const DEFAULTS = {
+  url:     'https://pfzkutnerfggqnyptcfg.supabase.co',
+  key:     'sb_publishable_jawst-gp5Kf_x9D970lHtg_vjAUYpv_',
+  pw:      'daversa2026',
+  members: ['Val','Kendall','Brendan','Connor','Sam','Jayce','Caeleigh'],
+  start:   '2026-03-13',
+  team:    'Daversa Partners',
 };
+if (!S.g('url'))     S.s('url',     DEFAULTS.url);
+if (!S.g('key'))     S.s('key',     DEFAULTS.key);
+if (!S.g('start'))   S.s('start',   DEFAULTS.start);
+if (!S.g('team'))    S.s('team',    DEFAULTS.team);
+if (!S.g('members')) S.s('members', JSON.stringify(DEFAULTS.members));
 
 let cfg = {
-  sbUrl:    LS.get('sb_url')   || '',
-  sbKey:    LS.get('sb_key')   || '',
-  password: LS.get('password') || 'daversa2026',
-  members:  LS.json('members') || [],
-  start:    LS.get('start')    || '',
-  team:     LS.get('team')     || 'Daversa Partners',
+  url:     S.g('url'),
+  key:     S.g('key'),
+  pw:      S.g('pw')      || DEFAULTS.pw,
+  members: S.j('members') || DEFAULTS.members,
+  start:   S.g('start'),
+  team:    S.g('team'),
 };
 
-let selectedNames   = new Set();
-let selectedSection = null;
-let selectedCat     = null;
-let allTeam         = false;
+// ── SUPABASE ──
+let sb = null;
+function initSB() {
+  if (!cfg.url || !cfg.key) return;
+  const { createClient } = supabase;
+  sb = createClient(cfg.url, cfg.key);
+}
 
-// ─────────────────────────────────────────────
-// AUTH
-// ─────────────────────────────────────────────
+// ── STATE ──
+let selNames = new Set(), selCat = null, allTeam = false;
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('dp_in') === '1') {
+    document.getElementById('g-pw').style.display = 'none';
+    initSB();
+    bootApp();
+  }
+});
+
+// ── AUTH ──
 function checkPw() {
-  const v = document.getElementById('pw-input').value;
-  if (v === cfg.password) {
-    sessionStorage.setItem('dp_admin', '1');
-    document.getElementById('gate-pw').style.display = 'none';
-    if (!cfg.sbUrl || !cfg.sbKey || !cfg.members.length || !cfg.start) {
-      showSetupGate();
-    } else {
-      bootApp();
-    }
+  const v = document.getElementById('pw-in').value;
+  if (v === cfg.pw) {
+    sessionStorage.setItem('dp_in', '1');
+    document.getElementById('g-pw').style.display = 'none';
+    initSB();
+    bootApp();
   } else {
-    toast('Incorrect password', 'error');
-    document.getElementById('pw-input').value = '';
-    document.getElementById('pw-input').focus();
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw-in').value = '';
+    document.getElementById('pw-in').focus();
   }
 }
+function logout() { sessionStorage.removeItem('dp_in'); location.reload(); }
 
-function logout() {
-  sessionStorage.removeItem('dp_admin');
-  location.reload();
-}
-
-// ─────────────────────────────────────────────
-// SETUP / CONFIG
-// ─────────────────────────────────────────────
-function showSetupGate() {
-  document.getElementById('gate-setup').style.display = 'flex';
-  document.getElementById('cfg-sb-url').value = cfg.sbUrl;
-  document.getElementById('cfg-sb-key').value = cfg.sbKey;
+// ── SETUP ──
+function showSetup() {
+  document.getElementById('g-setup').style.display = 'flex';
+  document.getElementById('cfg-url').value     = cfg.url;
+  document.getElementById('cfg-key').value     = cfg.key;
   document.getElementById('cfg-members').value = cfg.members.join('\n');
-  document.getElementById('cfg-start').value = cfg.start;
-  document.getElementById('cfg-team').value = cfg.team;
+  document.getElementById('cfg-start').value   = cfg.start;
+  document.getElementById('cfg-team').value    = cfg.team;
 }
-
-function saveConfig() {
-  const url     = document.getElementById('cfg-sb-url').value.trim();
-  const key     = document.getElementById('cfg-sb-key').value.trim();
-  const members = document.getElementById('cfg-members').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const start   = document.getElementById('cfg-start').value;
-  const team    = document.getElementById('cfg-team').value.trim() || 'Daversa Partners';
-  const newPw   = document.getElementById('cfg-pw').value;
-
-  if (!url || !key || !members.length || !start) {
-    toast('Please fill all required fields', 'error'); return;
-  }
-
-  applyConfig({ url, key, members, start, team, newPw });
-  document.getElementById('gate-setup').style.display = 'none';
+function saveSetup() {
+  const url  = document.getElementById('cfg-url').value.trim();
+  const key  = document.getElementById('cfg-key').value.trim();
+  const mems = document.getElementById('cfg-members').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const st   = document.getElementById('cfg-start').value;
+  const team = document.getElementById('cfg-team').value.trim() || 'Daversa Partners';
+  const npw  = document.getElementById('cfg-pw').value;
+  const err  = document.getElementById('cfg-err');
+  if (!url||!key||!mems.length||!st) { err.textContent='Please fill all required fields'; err.style.display='block'; return; }
+  err.style.display='none';
+  applyCfg({url,key,mems,st,team,npw});
+  document.getElementById('g-setup').style.display = 'none';
+  initSB();
   bootApp();
 }
-
-function applyConfig({ url, key, members, start, team, newPw }) {
-  cfg.sbUrl   = url;   LS.set('sb_url', url);
-  cfg.sbKey   = key;   LS.set('sb_key', key);
-  cfg.members = members; LS.set('members', JSON.stringify(members));
-  cfg.start   = start; LS.set('start', start);
-  cfg.team    = team;  LS.set('team', team);
-  if (newPw) { cfg.password = newPw; LS.set('password', newPw); }
+function applyCfg({url,key,mems,st,team,npw}) {
+  cfg.url=url;     S.s('url',url);
+  cfg.key=key;     S.s('key',key);
+  cfg.members=mems;S.s('members',JSON.stringify(mems));
+  cfg.start=st;    S.s('start',st);
+  cfg.team=team;   S.s('team',team);
+  if (npw) { cfg.pw=npw; S.s('pw',npw); }
 }
-
 function openSettings() {
-  const s = document.getElementById('panel-settings');
-  s.style.display = 'flex';
-  document.getElementById('s-sb-url').value  = cfg.sbUrl;
-  document.getElementById('s-sb-key').value  = cfg.sbKey;
+  document.getElementById('g-settings').style.display='flex';
+  document.getElementById('s-url').value     = cfg.url;
+  document.getElementById('s-key').value     = cfg.key;
   document.getElementById('s-members').value = cfg.members.join('\n');
   document.getElementById('s-start').value   = cfg.start;
   document.getElementById('s-team').value    = cfg.team;
 }
-function closeSettings() { document.getElementById('panel-settings').style.display='none'; }
-function updateSettings() {
-  const url     = document.getElementById('s-sb-url').value.trim();
-  const key     = document.getElementById('s-sb-key').value.trim();
-  const members = document.getElementById('s-members').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const start   = document.getElementById('s-start').value;
-  const team    = document.getElementById('s-team').value.trim() || 'Daversa Partners';
-  const newPw   = document.getElementById('s-pw').value;
-  applyConfig({ url, key, members, start, team, newPw });
+function closeSettings() { document.getElementById('g-settings').style.display='none'; }
+function saveSettings() {
+  const url  = document.getElementById('s-url').value.trim();
+  const key  = document.getElementById('s-key').value.trim();
+  const mems = document.getElementById('s-members').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const st   = document.getElementById('s-start').value;
+  const team = document.getElementById('s-team').value.trim() || 'Daversa Partners';
+  const npw  = document.getElementById('s-pw').value;
+  applyCfg({url,key,mems,st,team,npw});
   closeSettings();
-  buildNameChips();
-  document.getElementById('hdr-team').textContent = team;
-  toast('Settings saved ✓', 'success');
+  initSB();
+  buildChips();
+  document.getElementById('h-team').textContent = team;
+  toast('Settings saved ✓', 'ok');
 }
 
-// ─────────────────────────────────────────────
-// BOOT
-// ─────────────────────────────────────────────
+// ── BOOT ──
 function bootApp() {
   document.getElementById('app').style.display = 'block';
-  document.getElementById('hdr-team').textContent = cfg.team;
-  buildNameChips();
-  buildSectionTabs();
-  initDatePicker();
+  document.getElementById('h-team').textContent = cfg.team;
+  buildChips();
+  buildSecTabs();
+  initDate();
   loadEntries();
 }
 
-// ─────────────────────────────────────────────
-// INIT ON PAGE LOAD
-// ─────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('dp_admin') === '1') {
-    if (!cfg.sbUrl || !cfg.sbKey || !cfg.members.length || !cfg.start) {
-      showSetupGate();
-      document.getElementById('gate-pw').style.display = 'none';
-    } else {
-      document.getElementById('gate-pw').style.display = 'none';
-      bootApp();
-    }
-  }
-  // gate-pw is visible by default
-});
-
-// ─────────────────────────────────────────────
-// NAME CHIPS
-// ─────────────────────────────────────────────
-function buildNameChips() {
-  const container = document.getElementById('name-chips');
-  container.innerHTML = cfg.members.map(name => `
-    <button class="chip" onclick="toggleName('${name}')" id="chip-${sanitizeId(name)}">${name}</button>
-  `).join('');
+// ── CHIPS ──
+function buildChips() {
+  document.getElementById('name-chips').innerHTML = cfg.members.map(n =>
+    `<button class="chip" id="c-${sid(n)}" onclick="toggleName('${n}')">${n}</button>`
+  ).join('');
 }
-
-function sanitizeId(s) { return s.replace(/[^a-zA-Z0-9]/g, '_'); }
-
-function toggleName(name) {
+function sid(s) { return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+function toggleName(n) {
   allTeam = false;
-  document.getElementById('all-team-btn').classList.remove('sel');
-
-  if (selectedNames.has(name)) {
-    selectedNames.delete(name);
-    document.getElementById('chip-'+sanitizeId(name)).classList.remove('sel');
-  } else {
-    selectedNames.add(name);
-    document.getElementById('chip-'+sanitizeId(name)).classList.add('sel');
-  }
+  document.getElementById('all-btn').classList.remove('on');
+  if (selNames.has(n)) { selNames.delete(n); document.getElementById('c-'+sid(n)).classList.remove('on'); }
+  else { selNames.add(n); document.getElementById('c-'+sid(n)).classList.add('on'); }
   updateSummary();
 }
-
-function toggleAllTeam() {
+function toggleAll() {
   allTeam = !allTeam;
-  const btn = document.getElementById('all-team-btn');
-  btn.classList.toggle('sel', allTeam);
-  selectedNames.clear();
-  document.querySelectorAll('.chip:not(.all-team)').forEach(c => c.classList.remove('sel'));
+  document.getElementById('all-btn').classList.toggle('on', allTeam);
+  selNames.clear();
+  document.querySelectorAll('.chip:not(.team-all)').forEach(c=>c.classList.remove('on'));
   updateSummary();
 }
 
-// ─────────────────────────────────────────────
-// SECTION TABS
-// ─────────────────────────────────────────────
-function buildSectionTabs() {
-  document.getElementById('sec-tabs').innerHTML = SECTIONS.map(s => `
-    <button class="sec-tab" id="sec-${s.id}" onclick="selectSection('${s.id}')">${s.emoji} ${s.label}</button>
-  `).join('');
+// ── SECTION TABS ──
+function buildSecTabs() {
+  document.getElementById('sec-tabs').innerHTML = SECTIONS.map(s =>
+    `<button class="stab" id="st-${s.id}" onclick="selectSec('${s.id}')">${s.label}</button>`
+  ).join('');
 }
-
-function selectSection(id) {
-  selectedSection = id;
-  selectedCat = null;
-
-  document.querySelectorAll('.sec-tab').forEach(t => t.classList.remove('sel'));
-  document.getElementById('sec-'+id).classList.add('sel');
-
-  const sec = SECTIONS.find(s => s.id === id);
-  const isBonus = id === 'bonus';
-  const isDeduct = id === 'deductions';
-
-  document.getElementById('act-container').innerHTML = `
-    <div class="act-grid">
-      ${sec.cats.map((c,i) => {
-        const neg   = c.pts < 0;
-        const bonus = c.bonus;
-        const cls   = neg ? 'neg' : bonus ? 'bonus' : '';
-        const bdgCls= neg ? 'neg' : bonus ? 'bonus' : (c.team ? 'team' : 'pos');
-        const ptsLbl= bonus ? 'Custom' : (c.pts > 0 ? `+${c.pts}` : c.pts);
-        return `
-          <div class="act-card ${cls}" id="act-${id}-${i}" onclick="selectCat('${id}',${i})">
-            <div class="act-name">${c.dual ? '🔄 ' : ''}${c.name}${c.team && !bonus ? ' <span style="opacity:.55;font-size:10px;">(team)</span>' : ''}</div>
-            <span class="act-badge ${bdgCls}">${ptsLbl}</span>
-          </div>`;
-      }).join('')}
-    </div>
-  `;
-
-  document.getElementById('bonus-fields').style.display = isBonus ? 'block' : 'none';
+function selectSec(id) {
+  selCat = null;
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('st-'+id).classList.add('on');
+  const sec = SECTIONS.find(s=>s.id===id);
+  document.getElementById('act-area').innerHTML = `<div class="agrid">${
+    sec.cats.map((c,i) => {
+      const neg=c.pts<0, bon=c.bonus;
+      const cls = neg?'neg':bon?'bonus':'';
+      const bdg = neg?'neg':bon?'bon':c.team?'team':'pos';
+      const lbl = bon?'Custom':(c.pts>0?`+${c.pts}`:c.pts);
+      return `<div class="acard ${cls}" id="ac-${id}-${i}" onclick="selectCat('${id}',${i})">
+        <div class="aname">${c.dual?'🔄 ':''}${c.name}${c.team&&!bon?' <span style="opacity:.5;font-size:10px;">(team)</span>':''}</div>
+        <span class="abadge ${bdg}">${lbl}</span>
+      </div>`;
+    }).join('')
+  }</div>`;
+  document.getElementById('bonus-card').style.display = id==='bonus' ? 'block' : 'none';
   updateSummary();
 }
-
-function selectCat(secId, idx) {
-  document.querySelectorAll('.act-card').forEach(c => c.classList.remove('sel'));
-  document.getElementById(`act-${secId}-${idx}`).classList.add('sel');
-  selectedCat = SECTIONS.find(s=>s.id===secId).cats[idx];
+function selectCat(sid2, idx) {
+  document.querySelectorAll('.acard').forEach(c=>c.classList.remove('on'));
+  document.getElementById(`ac-${sid2}-${idx}`).classList.add('on');
+  selCat = SECTIONS.find(s=>s.id===sid2).cats[idx];
   updateSummary();
-  updateSubmitBtn();
+  updateBtn();
 }
 
-// ─────────────────────────────────────────────
-// DATE / WEEK
-// ─────────────────────────────────────────────
-function initDatePicker() {
-  const inp = document.getElementById('date-input');
-  inp.value = new Date().toISOString().slice(0,10);
-  inp.addEventListener('change', updateWeekDisplay);
-  updateWeekDisplay();
+// ── DATE ──
+function initDate() {
+  const d = document.getElementById('date-in');
+  d.value = new Date().toISOString().slice(0,10);
+  d.addEventListener('change', updateWkNote);
+  updateWkNote();
+}
+function weekOf(ds) {
+  if (!ds||!cfg.start) return 1;
+  const diff = Math.floor((new Date(ds+'T00:00:00')-new Date(cfg.start+'T00:00:00'))/86400000);
+  return Math.max(1,Math.min(8,Math.floor(diff/7)+1));
+}
+function updateWkNote() {
+  const w = weekOf(document.getElementById('date-in').value);
+  document.getElementById('wk-note').textContent = `Week ${w} of 8`;
 }
 
-function getWeekNum(dateStr) {
-  if (!dateStr || !cfg.start) return 1;
-  const start = new Date(cfg.start + 'T00:00:00');
-  const d     = new Date(dateStr + 'T00:00:00');
-  if (isNaN(d)) return 1;
-  return Math.max(1, Math.min(8, Math.floor((d-start)/86400000/7)+1));
-}
-
-function updateWeekDisplay() {
-  const d = document.getElementById('date-input').value;
-  const w = getWeekNum(d);
-  document.getElementById('week-display').textContent = `Week ${w} of 8`;
-}
-
-// ─────────────────────────────────────────────
-// SUMMARY & VALIDATION
-// ─────────────────────────────────────────────
+// ── SUMMARY ──
 function updateSummary() {
-  const hasCat  = !!selectedCat;
-  const hasWho  = allTeam || selectedNames.size > 0;
-  const sum     = document.getElementById('sel-summary');
-
-  if (!hasCat || !hasWho) { sum.style.display='none'; updateSubmitBtn(); return; }
-
-  const names = allTeam ? cfg.members : [...selectedNames];
-  const pts   = selectedCat.bonus
-    ? (parseInt(document.getElementById('custom-pts')?.value) || 0)
-    : selectedCat.pts;
-
-  const ptsLbl = pts > 0 ? `+${pts}` : pts;
-  const pcls   = pts > 0 ? 'pos' : pts < 0 ? 'neg' : 'bonus';
-
-  document.getElementById('sel-who').textContent  = names.join(', ');
-  document.getElementById('sel-what').textContent = selectedCat.name;
-  document.getElementById('sel-pts').textContent  = `${ptsLbl} pts` + (names.length > 1 ? ` × ${names.length}` : '');
-  document.getElementById('sel-pts').className    = 'sel-pts ' + pcls;
+  const hasWho = allTeam || selNames.size > 0;
+  const hasCat = !!selCat;
+  const sum = document.getElementById('sel-sum');
+  if (!hasWho||!hasCat) { sum.style.display='none'; updateBtn(); return; }
+  const names = allTeam ? cfg.members : [...selNames];
+  const pts = selCat.bonus ? (parseInt(document.getElementById('custom-pts')?.value)||0) : selCat.pts;
+  const pcls = pts>0?'pos':pts<0?'neg':'bon';
+  document.getElementById('sum-who').textContent  = names.join(', ');
+  document.getElementById('sum-what').textContent = selCat.name;
+  document.getElementById('sum-pts').textContent  = `${pts>0?'+':''}${pts} pts${names.length>1?' × '+names.length:''}`;
+  document.getElementById('sum-pts').className    = 'sel-pts '+pcls;
   sum.style.display = 'flex';
-  updateSubmitBtn();
+  updateBtn();
 }
-
-function updateSubmitBtn() {
-  const hasCat  = !!selectedCat;
-  const hasWho  = allTeam || selectedNames.size > 0;
-  const btn     = document.getElementById('submit-btn');
-  btn.disabled  = !hasCat || !hasWho;
-
-  if (selectedCat) {
-    const neg   = selectedCat.pts < 0;
-    const bonus = selectedCat.bonus;
-    btn.className = 'submit-btn' + (neg ? ' neg' : bonus ? ' bonus' : '');
-    btn.textContent = neg ? 'Apply Deduction →' : bonus ? 'Award Bonus →' : 'Log Points →';
+function updateBtn() {
+  const ok = (allTeam||selNames.size>0) && !!selCat;
+  const btn = document.getElementById('sub-btn');
+  btn.disabled = !ok;
+  if (selCat) {
+    const neg=selCat.pts<0, bon=selCat.bonus;
+    btn.className = 'sub-btn'+(neg?' neg':bon?' bon':'');
+    btn.textContent = neg?'Apply Deduction →':bon?'Award Bonus →':'Log Points →';
   }
 }
 
-// ─────────────────────────────────────────────
-// SUPABASE
-// ─────────────────────────────────────────────
-function sbHeaders() {
-  return { 'apikey': cfg.sbKey, 'Authorization': 'Bearer '+cfg.sbKey, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-}
-function sbUrl(path) { return cfg.sbUrl.replace(/\/$/, '') + '/rest/v1/' + path; }
-
-async function sbInsert(rows) {
-  const res = await fetch(sbUrl('points'), { method:'POST', headers:sbHeaders(), body:JSON.stringify(rows) });
-  if (!res.ok) { const t=await res.text(); throw new Error(t); }
-  return res.json();
-}
-
-async function sbDelete(id) {
-  const res = await fetch(sbUrl(`points?id=eq.${id}`), { method:'DELETE', headers:sbHeaders() });
-  if (!res.ok) throw new Error('Delete failed');
-}
-
-async function sbFetch() {
-  const res = await fetch(sbUrl('points?select=*&order=created_at.desc&limit=60'), { headers:sbHeaders() });
-  if (!res.ok) throw new Error('Fetch failed');
-  return res.json();
-}
-
-// ─────────────────────────────────────────────
-// SUBMIT
-// ─────────────────────────────────────────────
+// ── SUBMIT ──
 async function submitPoints() {
-  const btn = document.getElementById('submit-btn');
-  if (btn.disabled) return;
-
-  // Validate
-  const names  = allTeam ? cfg.members : [...selectedNames];
-  const date   = document.getElementById('date-input').value;
-  const notes  = document.getElementById('notes-input').value.trim();
-  const week   = getWeekNum(date);
-
-  let pts = selectedCat.pts;
-  let cat = selectedCat.name;
-  let isBonus = false;
-
-  if (selectedCat.bonus) {
-    pts     = parseInt(document.getElementById('custom-pts').value);
+  const btn = document.getElementById('sub-btn');
+  if (btn.disabled || !sb) return;
+  const names = allTeam ? cfg.members : [...selNames];
+  const date  = document.getElementById('date-in').value;
+  const notes = document.getElementById('notes').value.trim();
+  const week  = weekOf(date);
+  const sec   = SECTIONS.find(s=>s.cats.includes(selCat));
+  let pts = selCat.pts, cat = selCat.name, isBonus = false;
+  if (selCat.bonus) {
+    pts = parseInt(document.getElementById('custom-pts').value);
     const r = document.getElementById('custom-reason').value.trim();
-    cat     = r ? `Bonus: ${r}` : 'Bonus (admin discretion)';
+    cat = r ? `Bonus: ${r}` : 'Bonus (admin discretion)';
     isBonus = true;
-    if (!pts) { toast('Enter a point value for the bonus', 'error'); return; }
+    if (!pts) { toast('Enter a point value for the bonus', 'err'); return; }
   }
-
-  const sec = SECTIONS.find(s => s.cats.includes(selectedCat));
-
-  const rows = names.map(name => ({
-    date, name, category: cat, section: sec?.label || '', points: pts, week, notes, is_bonus: isBonus
-  }));
-
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
+  const rows = names.map(name => ({ date, name, category:cat, section:sec?.label||'', points:pts, week, notes, is_bonus:isBonus }));
+  btn.disabled = true; btn.textContent = 'Saving…';
   try {
-    await sbInsert(rows);
-    const total = pts * names.length;
-    toast(`✓ Logged ${pts > 0 ? '+' : ''}${pts} pts for ${names.length > 1 ? names.length + ' people' : names[0]}`, 'success');
+    const { error } = await sb.from('points').insert(rows);
+    if (error) throw error;
+    toast(`✓ +${pts} pts logged for ${names.length>1?names.length+' people':names[0]}`, 'ok');
     resetForm();
     loadEntries();
   } catch(e) {
     console.error(e);
-    toast('Error saving: ' + e.message, 'error');
-    updateSubmitBtn();
+    toast('Error: ' + (e.message||JSON.stringify(e)), 'err');
+    updateBtn();
   }
 }
-
 function resetForm() {
-  selectedNames.clear();
-  selectedSection = null;
-  selectedCat     = null;
-  allTeam         = false;
-
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
-  document.querySelectorAll('.sec-tab').forEach(t => t.classList.remove('sel'));
-  document.getElementById('act-container').innerHTML = '<div class="empty-state">Select a section above to see activities</div>';
-  document.getElementById('sel-summary').style.display = 'none';
-  document.getElementById('notes-input').value = '';
-  document.getElementById('bonus-fields').style.display = 'none';
-  updateSubmitBtn();
+  selNames.clear(); selCat=null; allTeam=false;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('act-area').innerHTML = '<div class="empty">Select a section above</div>';
+  document.getElementById('sel-sum').style.display = 'none';
+  document.getElementById('notes').value = '';
+  document.getElementById('bonus-card').style.display = 'none';
+  updateBtn();
 }
 
-// ─────────────────────────────────────────────
-// RECENT ENTRIES
-// ─────────────────────────────────────────────
+// ── ENTRIES ──
 async function loadEntries() {
+  if (!sb) return;
   try {
-    const data = await sbFetch();
-    renderEntries(data);
-  } catch(e) {
-    document.getElementById('entry-list').innerHTML = `<div class="empty-state" style="color:var(--red);">Could not load entries: ${e.message}</div>`;
-  }
-}
-
-function renderEntries(data) {
-  document.getElementById('entry-count').textContent = `${data.length} recent entries`;
-  if (!data.length) {
-    document.getElementById('entry-list').innerHTML = '<div class="empty-state">No entries yet. Log the first points!</div>';
-    return;
-  }
-  document.getElementById('entry-list').innerHTML = data.map(r => {
-    const pos   = r.points > 0;
-    const ptsCls= pos ? 'pos' : 'neg';
-    const ptsStr= (pos ? '+' : '') + r.points;
-    return `
-      <div class="entry-item">
-        <div class="entry-left">
-          <div class="entry-name">${r.name}</div>
-          <div class="entry-cat">${r.category}</div>
-          <div class="entry-meta">${r.date} · Week ${r.week}${r.notes ? ' · '+r.notes : ''}</div>
+    const { data, error } = await sb.from('points').select('*').order('created_at', {ascending:false}).limit(60);
+    if (error) throw error;
+    document.getElementById('entry-ct').textContent = `${data.length} recent entries`;
+    if (!data.length) { document.getElementById('elist').innerHTML='<div class="empty">No entries yet. Log the first points!</div>'; return; }
+    document.getElementById('elist').innerHTML = data.map(r => {
+      const pos = r.points > 0;
+      return `<div class="eitem">
+        <div style="flex:1;min-width:0;">
+          <div class="ename">${r.name}</div>
+          <div class="ecat">${r.category}</div>
+          <div class="emeta">${r.date} · Week ${r.week}${r.notes?' · '+r.notes:''}</div>
         </div>
-        <div class="entry-right">
-          <span class="entry-pts ${ptsCls}">${ptsStr}</span>
-          <button class="del-btn" onclick="deleteEntry(${r.id})" title="Delete">🗑</button>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span class="epts ${pos?'pos':'neg'}">${pos?'+':''}${r.points}</span>
+          <button class="dbtn" onclick="delEntry(${r.id})" title="Delete">🗑</button>
         </div>
       </div>`;
-  }).join('');
-}
-
-async function deleteEntry(id) {
-  if (!confirm('Delete this entry? This cannot be undone.')) return;
-  try {
-    await sbDelete(id);
-    toast('Entry deleted', 'success');
-    loadEntries();
+    }).join('');
   } catch(e) {
-    toast('Could not delete: ' + e.message, 'error');
+    document.getElementById('elist').innerHTML = `<div class="empty" style="color:var(--red);">Load error: ${e.message}</div>`;
   }
 }
-
-// ─────────────────────────────────────────────
-// TOAST
-// ─────────────────────────────────────────────
-let toastTimer;
-function toast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+async function delEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  try {
+    const { error } = await sb.from('points').delete().eq('id', id);
+    if (error) throw error;
+    toast('Entry deleted', 'ok');
+    loadEntries();
+  } catch(e) { toast('Delete failed: '+e.message, 'err'); }
 }
 
+// ── TOAST ──
+let tt;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className='show '+type;
+  clearTimeout(tt); tt=setTimeout(()=>{el.className='';},3500);
+}
 </script>
 </body>
 </html>
