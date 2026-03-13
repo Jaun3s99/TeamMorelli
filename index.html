@@ -196,9 +196,9 @@
 <div id="app" style="display:none;">
   <header>
     <div class="hh">
-      <div class="hl"><h1>🏆 <span id="h-team">Daversa Partners</span></h1><p>Search Excellence Championship · 8-Week Season</p></div>
+      <div class="hl"><h1>🏆 <span id="h-team">Daversa Partners</span></h1><p>Search Excellence Championship · 4-Week Season</p></div>
       <div class="hr">
-        <span class="wpill" id="h-week">Week — of 8</span>
+        <span class="wpill" id="h-week">Week — of 4</span>
         <div class="pw"><div class="pw-l">Season</div><div class="pt"><div class="pf" id="prog" style="width:0%"></div></div></div>
         <button class="hbtn" onclick="load()">↺ Refresh</button>
         <button class="hbtn" onclick="openModal()">⚙</button>
@@ -257,6 +257,7 @@ const SECTIONS = [
     {name:'Search call notes (night before)',                        pts:5,  team:true},
     {name:'Action items notes (≤1hr post search call)',             pts:5,  team:true},
     {name:'Game plan articulation / proactive strategy with PL',   pts:10, team:true},
+    {name:'Great use of clockwork notes / sending through to team', pts:10, team:true},
   ]},
   {id:'collab', label:'🤝 Collaboration / Team-First', cats:[
     {name:'Smart AI leverage shared with team',                     pts:10},
@@ -267,7 +268,7 @@ const SECTIONS = [
   {id:'cand', label:'🎯 Candidate Gen / Conversion', cats:[
     {name:'Networking → sourced candidate',                         pts:10},
     {name:'Candidate into process (past first convo)',              pts:15},
-    {name:'Kept candidate in process when they tried to pull',      pts:15},
+    {name:'Converting a candidate who originally says no or keeping candidate in process', pts:15},
   ]},
   {id:'qual', label:'💎 Search Quality', cats:[
     {name:'Proactive client touchpoint / meaningful recap',         pts:10},
@@ -286,7 +287,7 @@ const SECTIONS = [
     {name:'General mismanagement (blindsided by candidate/meeting)',pts:-5,  team:true},
     {name:'Candidate clearly misqualified entering process',        pts:-5,  team:true},
     {name:'Missed issue / bad backchannel surprise (post R2)',      pts:-10, team:true},
-    {name:'Too much "I" vs "We" on search call',                   pts:-15, team:true},
+    {name:'Too much "I" vs "We" on search call',                   pts:-5, team:true},
   ]},
 ];
 const CLOSES = new Set(['Search closed — originated candidate (helped manage)','Search closed — new to firm','Clean close (no comp drama, no backchannel surprises)']);
@@ -364,8 +365,8 @@ function showS(s){
 }
 
 // ── CALC ──
-function aw(d){if(!d||!cfg.start)return 1;const diff=Math.floor((new Date(d+'T00:00:00')-new Date(cfg.start+'T00:00:00'))/86400000);return Math.max(1,Math.min(8,Math.floor(diff/7)+1));}
-function calcWeek(){const diff=Math.floor((new Date()-new Date(cfg.start+'T00:00:00'))/86400000);currentWeek=Math.max(1,Math.min(8,Math.floor(diff/7)+1));}
+function aw(d){if(!d||!cfg.start)return 1;const diff=Math.floor((new Date(d+'T00:00:00')-new Date(cfg.start+'T00:00:00'))/86400000);return Math.max(1,Math.min(4,Math.floor(diff/7)+1));}
+function calcWeek(){const diff=Math.floor((new Date()-new Date(cfg.start+'T00:00:00'))/86400000);currentWeek=Math.max(1,Math.min(4,Math.floor(diff/7)+1));}
 function calcStandings(){
   const m={};
   rows.forEach(r=>{
@@ -375,7 +376,7 @@ function calcStandings(){
     p.total+=r.points;p.entries++;
     p.weekly[w]=(p.weekly[w]||0)+r.points;
   });
-  for(let w=1;w<=8;w++){
+  for(let w=1;w<=4;w++){
     let best=-Infinity,winner=null;
     Object.values(m).forEach(p=>{const pts=p.weekly[w]||0;if(pts>best){best=pts;winner=p.name;}});
     if(winner&&best>0)m[winner].wins++;
@@ -386,8 +387,8 @@ function calcStandings(){
 // ── RENDER ──
 function render(){
   document.getElementById('h-team').textContent=cfg.team;
-  document.getElementById('h-week').textContent=`Week ${currentWeek} of 8`;
-  document.getElementById('prog').style.width=(currentWeek/8*100)+'%';
+  document.getElementById('h-week').textContent=`Week ${currentWeek} of 4`;
+  document.getElementById('prog').style.width=(currentWeek/4*100)+'%';
   renderStats();renderCloses();renderPodium();renderStandings();renderWeekly();renderActivity();
 }
 function ini(n){return n.split(' ').map(x=>x[0]||'').join('').slice(0,2).toUpperCase();}
@@ -427,7 +428,7 @@ function renderStandings(){
 }
 function renderWeekly(){
   let h='';
-  for(let w=1;w<=8;w++){
+  for(let w=1;w<=4;w++){
     const isc=w===currentWeek,isf=w>currentWeek;
     const wd=standings.map(p=>({name:p.name,pts:p.weekly[w]||0})).filter(d=>d.pts!==0).sort((a,b)=>b.pts-a.pts);
     const win=wd.length&&wd[0].pts>0?wd[0]:null;
